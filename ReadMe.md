@@ -11,6 +11,7 @@ This repository contains examples and documentation for learning Go.
 - [Arrays](arrays/arrays.md)
 - [Slices](slices/slices.md)
 - [Maps](maps/map.md)
+- [Range](range/range.md)
 - [Functions](functions/functions.md)
 - [If Statements](if/if.md)
 - [Switch Statements](switch/switch.md)
