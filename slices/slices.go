@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 func main() {
 	// A nil slice has no elements and no backing array. It is ready for append.
@@ -53,4 +56,70 @@ func main() {
 	// An empty slice is non-nil, while both nil and empty slices have length zero.
 	empty := []int{}
 	fmt.Println("Nil:", numbers == nil, "empty:", empty == nil)
+	
+	var num = make([]int, 3)
+
+	num = append(num, 2) // Output: Num: [0 0 0	 2]
+	num = append(num, 3) // Output: Num: [0 0 0	 2 3]
+	num = append(num, 4) // Output: Num: [0 0 0	 2 3 4]
+
+
+	// Slice Operations
+	var slice1 = []int{1, 2, 3, 4, 5}
+	var slice2 = []int{6, 7, 8, 9, 10}
+	fmt.Println("Slice2:", slice2)
+
+	// Slice Package Functions
+	// Slices.clone()
+	// Clone returns a copy of the slice s. The copy is a new slice backed by a new array.
+	fmt.Println("", slices.Clone(slice1)) // Output: [1 2 3 4 5]
+
+	// Slices.contains()
+	// Contains reports whether the slice s contains the value v.
+	fmt.Println("", slices.Contains(slice1, 3)) // Output: true
+
+	// Slices.delete()
+	// Delete removes the element at index i from s. The order of the remaining elements is preserved.
+	slice1 = slices.Delete(slice1, 2, 3) // Output: [1 2 4 5]
+	fmt.Println("Slice1 after delete:", slice1)
+
+	// Slices.insert()
+	// Insert inserts the values v into s at index i. The order of the existing elements is preserved.
+	slice1 = slices.Insert(slice1, 2, 3) // Output: [1 2 3 4 5]
+	fmt.Println("Slice1 after insert:", slice1)
+
+	// Slices.reverse()
+	// Reverse reverses the order of the elements in s.
+	slices.Reverse(slice1) // Output: [5 4 3 2 1]
+	fmt.Println("Slice1 after reverse:", slice1)
+
+	// Slices.sort()
+	// Sort sorts the elements of s in ascending order.
+	slices.Sort(slice1) // Output: [1 2 3 4 5]
+	fmt.Println("Slice1 after sort:", slice1)
+
+	// Slices.unique()
+	// Unique returns a new slice containing the unique elements of s, in the order they first appear.
+	slice3 := []int{1, 2, 2, 3, 3, 3, 4, 4, 4, 4}
+	slices.Sort(slice3) // Output: [1 2 2 3 3 3 4 4 4 4]
+	uniqueSlice := slices.Compact(slice3) // Output: [1 2 3 4]
+	fmt.Println("Slice3 after unique:", uniqueSlice)
+
+
+	// slices.grow()
+	// Grow returns a slice with the same elements as s, but with a capacity of at least n.
+	// If n is less than or equal to the capacity of s, Grow returns s.
+	// Otherwise, Grow allocates a new slice with the same elements as s and a capacity of at least n.
+	num = slices.Grow(num, 10) // Output: Num: [0 0 0 2 3 4 0 0 0 0]
+
+	// slices.Equal()
+	// Equal reports whether the two slices s and t are equal.
+	slice4 := []int{1, 2, 3, 4, 5}
+	slice5 := []int{1, 2, 3, 4, 5}
+	fmt.Println("Slice4 and Slice5 are equal:", slices.Equal(slice4, slice5)) // Output: true
+
+
+
+	fmt.Println("Num:", num )
 }
+

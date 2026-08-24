@@ -174,6 +174,49 @@ import "slices"
 slices.Equal([]int{1, 2}, []int{1, 2}) // true
 ```
 
+## Standard Library Helpers
+
+Go 1.21 and newer include the generic `slices` package for common operations:
+
+```go
+import "slices"
+
+slice := []int{1, 2, 3, 4, 5}
+
+copyOfSlice := slices.Clone(slice)
+fmt.Println(copyOfSlice) // [1 2 3 4 5]
+
+fmt.Println(slices.Contains(slice, 3)) // true
+
+slice = slices.Delete(slice, 2, 3)
+fmt.Println(slice) // [1 2 4 5]
+
+slice = slices.Insert(slice, 2, 3)
+fmt.Println(slice) // [1 2 3 4 5]
+
+slices.Reverse(slice)
+fmt.Println(slice) // [5 4 3 2 1]
+
+slices.Sort(slice)
+fmt.Println(slice) // [1 2 3 4 5]
+```
+
+`slices.Delete` removes the half-open range `[start:end]` and preserves the
+order of the remaining elements. `slices.Insert` inserts values at an index
+and also preserves order. `slices.Reverse` and `slices.Sort` modify the slice
+in place, while `slices.Clone` returns an independent copy.
+
+Use `slices.Compact` to remove consecutive duplicate values. It modifies the
+underlying slice and returns the shortened view, so sort first when all
+duplicates should be grouped together:
+
+```go
+values := []int{1, 2, 2, 3, 3, 3, 4, 4}
+slices.Sort(values)
+uniqueValues := slices.Compact(values)
+fmt.Println(uniqueValues) // [1 2 3 4]
+```
+
 ## Passing Slices to Functions
 
 A slice passed to a function is passed by value, but its header still points to
