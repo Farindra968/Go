@@ -1,8 +1,8 @@
 # Go Learning Notes
 
-This repository contains examples and documentation for learning Go.
+This repository is a practical Go learning workspace with small examples and notes organized by topic.
 
-## Topics
+## Learning order
 
 - [Basic Go](basic/go.md)
 - [Variables](variable/variable.md)
@@ -17,6 +17,25 @@ This repository contains examples and documentation for learning Go.
 - [Closures](closures/closures.md)
 - [Pointers](pointers/pointers.md)
 - [Structs](structs/structs.md)
+- [Interfaces](interfaces/interfaces.md)
 - [If Statements](if/if.md)
 - [Switch Statements](switch/switch.md)
 - [Loops](loop/loop.md)
+- [Generics](generics/generics.md)
+- [Enums](enums/enums.md)
+
+## Notes
+
+This order follows a beginner-friendly progression from basic syntax to reusable abstractions.
+
+## Run an example
+
+From the project root, run a file like this:
+
+```bash
+go run generics/generics.go
+```
+
+## Current topic
+
+The latest lesson added is generics, which covers generic functions, constraints, and reusable generic data structures.
