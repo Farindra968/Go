@@ -23,6 +23,8 @@ This repository is a practical Go learning workspace with small examples and not
 - [Loops](loop/loop.md)
 - [Generics](generics/generics.md)
 - [Enums](enums/enums.md)
+- [Files](files/files.md)
+- [Error Handling](error/error.md)
 
 ## Notes
 
@@ -38,4 +40,4 @@ go run generics/generics.go
 
 ## Current topic
 
-The latest lesson added is generics, which covers generic functions, constraints, and reusable generic data structures.
+The latest lesson added is error handling, which covers returning errors, wrapping errors, validating input, and handling panics safely.
