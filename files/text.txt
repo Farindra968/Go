@@ -1,0 +1,2 @@
+Welcome to the Go lang
+This is written with WriteString

@@ -1,0 +1,2 @@
+Hello from os.WriteFile!
+This is the first write example.

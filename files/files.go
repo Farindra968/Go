@@ -3,63 +3,188 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 func main() {
-	f, err := os.Open("example.txt")
+	baseDir := findWorkingDir()
+	examplePath := filepath.Join(baseDir, "example.txt")
+
+	fmt.Println("=== File metadata and open methods ===")
+	file, err := os.Open(examplePath)
 	if err != nil {
-		panic(err) // Panic if the file cannot be opened
+		panic(err)
 	}
 
-	//f.name() returns the name of the file as a string, and f.Stat() returns a FileInfo object that contains information about the file, such as its size and permissions. We handle any errors that may occur when retrieving this information by panicking if an error occurs. Finally, we print the file name, size, and mode to the console.
-	fileName := f.Name()
-
-
-	fileInfo, err := f.Stat()
+	fileInfo, err := file.Stat()
 	if err != nil {
-		panic(err) // Panic if the file information cannot be retrieved
+		panic(err)
 	}
-	fmt.Println("File Information:", fileName, fileInfo.Size(), fileInfo.Mode())
-	fmt.Println("Is Directory:", fileInfo.IsDir()) // Check if the file is a directory
-	fmt.Println("Last Modification Time:", fileInfo.ModTime()) // Print the last modification time of the file
-	fmt.Println("System-specific Information:", fileInfo.Sys()) // Print system-specific information about the file
-	fmt.Println("Size (bytes):", fileInfo.Size()) // Print the size of the file in bytes
-	fmt.Println("Permissions:", fileInfo.Mode()) // Print the file mode (permissions)
-	fmt.Println("Name:", fileInfo.Name()) // Print the name of the file
-	fmt.Println("Last Modification Time + 24 hours:", fileInfo.ModTime().Add(24 * time.Hour)) // Print the last modification time of the file plus 24 hours
-	fmt.Println("Is After Current Time:", fileInfo.ModTime().After(time.Now())) // Print whether the last modification time of the file is after the current time
-	fmt.Println("Last Modification Time + 1 year, 1 month, 1 day:", fileInfo.ModTime().AddDate(1, 1, 1)) // Print the last modification time of the file plus one year, one month, and one day
 
-	// Reading the file content
-	content, err := os.Open("example.txt")
+	fmt.Println("File Name:", fileInfo.Name())
+	fmt.Println("File Size:", fileInfo.Size(), "bytes")
+	fmt.Println("Mode:", fileInfo.Mode())
+	fmt.Println("Is Directory:", fileInfo.IsDir())
+	fmt.Println("Last Modified:", fileInfo.ModTime().Format(time.RFC3339))
+	fmt.Println("Current mode string:", fileInfo.Mode().String())
+	fmt.Println("System info:", fileInfo.Sys())
+	_ = file.Close()
+
+	fmt.Println("\n=== Reading methods ===")
+	contentFile, err := os.Open(examplePath)
 	if err != nil {
-		panic(err) // Panic if the file cannot be opened for reading
+		panic(err)
 	}
+	defer contentFile.Close()
 
-	defer content.Close() // Ensure the file is closed after reading
+	buffer := make([]byte, 128)
+	n, err := contentFile.Read(buffer)
+	if err != nil && err.Error() != "EOF" {
+		panic(err)
+	}
+	fmt.Printf("Read using File.Read: %q\n", strings.TrimSpace(string(buffer[:n])))
 
-	buffer:= make([]byte, 100) // Create a buffer to hold the file content
-	d, err := content.Read(buffer)
+	data, err := os.ReadFile(examplePath)
 	if err != nil {
-		panic(err) // Panic if there is an error reading the file
+		panic(err)
 	}
+	fmt.Printf("Read using os.ReadFile: %q\n", strings.TrimSpace(string(data)))
 
-	// Print each byte of the buffer as a character
-	for i:=0; i < len(buffer); i++ {
-		fmt.Printf("%c", string(buffer[i])) // Print each byte of the buffer as a character
-	}
-
-	// Print the file content as a string, trimming any whitespace
-	fmt.Println("File Content", d, strings.TrimSpace(string(buffer))) 
-
-	// Other ways to read the file content
-	// Read the entire file content into a byte slice
-	data, err := os.ReadFile("example.txt")
+	fmt.Println("\n=== Directory methods ===")
+	dir, err := os.Open(baseDir)
 	if err != nil {
-		panic(err) // Panic if there is an error reading the file
+		panic(err)
 	}
-	fmt.Println("File Content using ReadFile:", string(data)) // Print the file content as a string
+	defer dir.Close()
 
+	entries, err := dir.ReadDir(-1)
+	if err != nil {
+		panic(err)
+	}
+	for _, entry := range entries {
+		fmt.Printf("Entry: %s | IsDir: %v | Type: %v\n", entry.Name(), entry.IsDir(), entry.Type())
+	}
+
+	fmt.Println("\n=== Write methods ===")
+	writePath := filepath.Join(baseDir, "write_example.txt")
+	writeContent := "Hello from os.WriteFile!\nThis is the first write example.\n"
+	if err := os.WriteFile(writePath, []byte(writeContent), 0644); err != nil {
+		panic(err)
+	}
+	fmt.Println("os.WriteFile created:", writePath)
+	fmt.Println(string(mustReadFile(writePath)))
+
+	updatePath := filepath.Join(baseDir, "update_example.txt")
+	if err := os.WriteFile(updatePath, []byte("Old content\n"), 0644); err != nil {
+		panic(err)
+	}
+	fileToUpdate, err := os.OpenFile(updatePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := fileToUpdate.WriteString("Updated content using O_TRUNC\n"); err != nil {
+		panic(err)
+	}
+	if err := fileToUpdate.Close(); err != nil {
+		panic(err)
+	}
+	fmt.Println("os.OpenFile with O_TRUNC updated:", updatePath)
+	fmt.Println(string(mustReadFile(updatePath)))
+
+	appendPath := filepath.Join(baseDir, "append_example.txt")
+	if err := os.WriteFile(appendPath, []byte("First line\n"), 0644); err != nil {
+		panic(err)
+	}
+	fileToAppend, err := os.OpenFile(appendPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := fileToAppend.WriteString("Second line appended\nThird line appended\n"); err != nil {
+		panic(err)
+	}
+	if err := fileToAppend.Close(); err != nil {
+		panic(err)
+	}
+	fmt.Println("os.OpenFile with O_APPEND appended:", appendPath)
+	fmt.Println(string(mustReadFile(appendPath)))
+
+	modifyPath := filepath.Join(baseDir, "modify_example.txt")
+	if err := os.WriteFile(modifyPath, []byte("Go is fun and easy"), 0644); err != nil {
+		panic(err)
+	}
+	currentData, err := os.ReadFile(modifyPath)
+	if err != nil {
+		panic(err)
+	}
+	updatedText := strings.Replace(string(currentData), "easy", "powerful", 1)
+	if err := os.WriteFile(modifyPath, []byte(updatedText), 0644); err != nil {
+		panic(err)
+	}
+	fmt.Println("Content modified using strings.Replace:", string(mustReadFile(modifyPath)))
+
+	bytesPath := filepath.Join(baseDir, "bytes_example.txt")
+	bytesFile, err := os.Create(bytesPath)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := bytesFile.Write([]byte("This file was written using File.Write")); err != nil {
+		panic(err)
+	}
+	if err := bytesFile.Close(); err != nil {
+		panic(err)
+	}
+	fmt.Println("File.Write example:", string(mustReadFile(bytesPath)))
+
+	textPath := filepath.Join(baseDir, "text.txt")
+	textFile, err := os.Create(textPath)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := textFile.WriteString("Welcome to Go!\nThis is written with WriteString.\n"); err != nil {
+		panic(err)
+	}
+	if err := textFile.Close(); err != nil {
+		panic(err)
+	}
+	fmt.Println("File.WriteString example:", string(mustReadFile(textPath)))
+
+	fmt.Println("\n=== File permissions and cleanup ===")
+	tempPath := filepath.Join(baseDir, "temp_demo.txt")
+	if err := os.WriteFile(tempPath, []byte("temporary file"), 0644); err != nil {
+		panic(err)
+	}
+	if err := os.Chmod(tempPath, 0600); err != nil {
+		panic(err)
+	}
+	info, err := os.Stat(tempPath)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("File permission after Chmod:", info.Mode().String())
+	if err := os.Remove(tempPath); err != nil {
+		panic(err)
+	}
+	fmt.Println("Temporary file removed successfully.")
+}
+
+func mustReadFile(path string) []byte {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func findWorkingDir() string {
+	candidatePaths := []string{".", filepath.Join(".", "files"), filepath.Join("..", "files")}
+
+	for _, p := range candidatePaths {
+		if info, err := os.Stat(filepath.Join(p, "example.txt")); err == nil && !info.IsDir() {
+			return p
+		}
+	}
+
+	return "."
 }
