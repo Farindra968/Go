@@ -1,0 +1,11 @@
+env: "development"
+http:
+  addr: "localhost:8080"
+  timeout: 40
+storage_path: "storage/storage.db"
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  url: ""
