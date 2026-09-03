@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Farindra968/go_project1/internal/config"
+	health "github.com/Farindra968/go_project1/internal/http/handlers/healths"
 	"github.com/Farindra968/go_project1/internal/http/handlers/students"
 )
 
@@ -47,10 +48,9 @@ func main() {
 	
 	router:= http.NewServeMux()
 
-	// Define a simple handler for the root path ("/") that responds with "Hello World!" when accessed via a GET request.
-	// The router.HandleFunc method registers the handler function for the specified HTTP method and path.
-	// The handler function takes an http.ResponseWriter and an http.Request as parameters, allowing it to write a response back to the client and access request details.
-	router.HandleFunc("GET /api/students", students.StudentHandler())
+	const apiPrefix = "/api/v1"
+	router.HandleFunc("GET " + apiPrefix + "/health", health.HealthHandler())
+	router.HandleFunc("POST " + apiPrefix + "/students", students.StudentHandler())
 
 	fmt.Println("Server Starting successfully in:", cfg.HTTPServer.Addr)
 
