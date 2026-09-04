@@ -32,6 +32,16 @@ func GetErrorResponse(err error, statusCode int) ErrorResponse {
 	}
 }
 
+
+func GetSuccessResponse( message string, statusCode int, data interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"message": message,
+		"code":    statusCode,
+		"data": data,
+		
+	}
+}
+
 // ValidationErrorResponse takes a validator.ValidationErrors object and constructs an ErrorResponse containing the validation error messages and the corresponding HTTP status code (400 Bad Request).
 func ValidationErrorResponse(errs validator.ValidationErrors) ErrorResponse {
 	var errorMessages []string

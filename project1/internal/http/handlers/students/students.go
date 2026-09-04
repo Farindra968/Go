@@ -7,12 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Farindra968/go_project1/internal/storage"
 	"github.com/Farindra968/go_project1/internal/types"
 	"github.com/Farindra968/go_project1/internal/utils/response"
 	"github.com/go-playground/validator/v10"
 )
 
-func StudentHandler() http.HandlerFunc {
+func StudentHandler(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		slog.Info("Creating student.")
@@ -43,6 +44,22 @@ func StudentHandler() http.HandlerFunc {
 			response.WriteJSONResponse(w, http.StatusBadRequest, response.ValidationErrorResponse(validationErrors))
 			return
 		}
+
+		result, err := storage.CreateStudent(
+			student.Name,
+			student.Email,
+			student.Age,
+			student.Password,
+		)
+
+		if err != nil {
+			response.WriteJSONResponse(w, http.StatusInternalServerError, response.GetErrorResponse(err, http.StatusInternalServerError))
+			return
+		}
+
+		response.WriteJSONResponse(w, http.StatusCreated, response.GetSuccessResponse("Student created successfully", http.StatusCreated, result))
+		slog.Info("Student created successfully with ID:", "id", result)
+
  		w.Write([]byte("Student handler called."))
 	}
 }

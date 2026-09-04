@@ -13,6 +13,7 @@ import (
 	"github.com/Farindra968/go_project1/internal/config"
 	health "github.com/Farindra968/go_project1/internal/http/handlers/healths"
 	"github.com/Farindra968/go_project1/internal/http/handlers/students"
+	"github.com/Farindra968/go_project1/internal/storage/sqlite"
 )
 
 func main() {
@@ -41,8 +42,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	slog.Info("Configuration loaded successfully")
 
-	// Database configuration is loaded from environment variables if available, otherwise defaults are used.
+	// Database Setup
+	storage, err := sqlite.NewSqLite(*cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	slog.Info("Database connection established successfully")
+
 	// Setup Router and HTTP server using the loaded configuration
 	// The router is created using http.NewServeMux(), which is a multiplexer that matches incoming requests to their respective handlers based on the request URL.
 	
@@ -50,9 +59,9 @@ func main() {
 
 	const apiPrefix = "/api/v1"
 	router.HandleFunc("GET " + apiPrefix + "/health", health.HealthHandler())
-	router.HandleFunc("POST " + apiPrefix + "/students", students.StudentHandler())
+	router.HandleFunc("POST " + apiPrefix + "/students", students.StudentHandler(storage))
 
-	fmt.Println("Server Starting successfully in:", cfg.HTTPServer.Addr)
+	slog.Info("Server Starting successfully in:", "addr", cfg.HTTPServer.Addr)
 
 	// Create an HTTP server using the loaded configuration, specifying the address and handler (router) for incoming requests.
 	// The http.Server struct is used to configure the server's address and request handling behavior.
@@ -78,9 +87,10 @@ func main() {
 	// The server.ListenAndServe() method starts the HTTP server and blocks until the server is stopped or an error occurs.
 	go func() {
 			err :=server.ListenAndServe()
+			slog.Error("Error starting server:", "err", err)
 
 			if err != nil {
-				fmt.Println("Error starting server:", err)
+				slog.Error("Error starting server:", "err", err)
 				panic(err)
 			}
 	} ()
