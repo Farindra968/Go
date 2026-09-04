@@ -60,6 +60,22 @@ func StudentHandler(storage storage.Storage) http.HandlerFunc {
 		response.WriteJSONResponse(w, http.StatusCreated, response.GetSuccessResponse("Student created successfully", http.StatusCreated, result))
 		slog.Info("Student created successfully with ID:", "id", result)
 
- 		w.Write([]byte("Student handler called."))
+	}
+}
+
+func GetStudentByID(storage storage.Storage) http.HandlerFunc {
+	return func (w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		slog.Info("Fetching student by ID:", "id", id)
+
+		student, err := storage.GetStudentByID(id)
+		if err != nil {
+			response.WriteJSONResponse(w, http.StatusInternalServerError, response.GetErrorResponse(err, http.StatusInternalServerError))
+			return
+		}
+
+		response.WriteJSONResponse(w, http.StatusOK, response.GetSuccessResponse("Student fetched successfully", http.StatusOK, student))
+		slog.Info("Student fetched successfully with ID:", "id", id)
+
 	}
 }

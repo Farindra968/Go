@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/Farindra968/go_project1/internal/config"
+	"github.com/Farindra968/go_project1/internal/types"
 	_ "modernc.org/sqlite"
 )
 
@@ -62,4 +63,20 @@ func (sql *SqLite) CreateStudent(name string, email string, age int, password st
 	}
 
 	return id, nil
+}
+
+func (sql *SqLite) GetStudentByID(id string) (types.Student, error) {
+	result, err := sql.Db.Prepare("SELECT * FROM users WHERE id = ? LIMIT 1")
+	if err != nil {
+		return types.Student{}, err
+	}
+	defer result.Close()
+
+	var student types.Student
+	err = result.QueryRow(id).Scan(&student.Id, &student.Name, &student.Email, &student.Age, &student.Password)
+	if err != nil {
+		return types.Student{}, err
+	}
+
+	return student, nil
 }

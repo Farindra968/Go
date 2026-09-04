@@ -60,6 +60,8 @@ func main() {
 	const apiPrefix = "/api/v1"
 	router.HandleFunc("GET " + apiPrefix + "/health", health.HealthHandler())
 	router.HandleFunc("POST " + apiPrefix + "/students", students.StudentHandler(storage))
+	router.HandleFunc("GET " + apiPrefix + "/students/{id}", students.GetStudentByID(storage))
+
 
 	slog.Info("Server Starting successfully in:", "addr", cfg.HTTPServer.Addr)
 
