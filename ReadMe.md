@@ -55,6 +55,47 @@ This order follows a beginner-friendly progression:
 - understand file handling and error management
 - finally study modular code with packages
 
+## Project 1: Student API
+
+The `project1` folder contains a small REST API built with Go's standard `net/http` package. It demonstrates:
+
+- YAML configuration loading with environment support
+- SQLite database storage
+- Student creation and lookup
+- Request validation with `validator`
+- JSON responses and graceful server shutdown
+
+### Run Project 1
+
+```bash
+cd project1
+go run ./cmd/project1
+```
+
+The server starts at `http://localhost:8080`. The SQLite database is created at `storage/storage.db`.
+
+### Project 1 endpoints
+
+Check the server health:
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+Create a student:
+
+```bash
+curl -X POST http://localhost:8080/api/v1/students \
+	-H "Content-Type: application/json" \
+	-d '{"name":"Ada Lovelace","email":"ada@example.com","age":28,"password":"secret123"}'
+```
+
+Fetch a student by ID:
+
+```bash
+curl http://localhost:8080/api/v1/students/{id}
+```
+
 ## How to use this repo
 
 Open any topic folder and run the corresponding Go file.
